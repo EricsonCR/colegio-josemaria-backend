@@ -1,7 +1,7 @@
 create database colegio_josemaria;
 use colegio_josemaria;
 
-drop table usuarios;
+-- drop table usuarios;
 create table usuarios(
 id int primary key auto_increment,
 rol varchar(20),
@@ -20,7 +20,7 @@ actualizacion date,
 estado boolean
 );
 
-drop table estudiantes;
+-- drop table estudiantes;
 create table estudiantes(
 id int primary key auto_increment,
 id_apoderado int,
@@ -38,7 +38,7 @@ actualizacion date,
 estado boolean
 );
 
-drop table apoderados;
+-- drop table apoderados;
 create table apoderados(
 id int primary key auto_increment,
 documento varchar(20),
@@ -56,7 +56,7 @@ actualizacion date,
 estado boolean
 );
 
-drop table conceptos;
+-- drop table conceptos;
 create table conceptos(
 id int primary key auto_increment,
 nombre varchar(20) unique,
@@ -65,7 +65,7 @@ actualizacion date,
 estado boolean
 );
 
-drop table conceptos_detalle;
+-- drop table conceptos_detalle;
 create table conceptos_detalle(
 id int primary key auto_increment,
 id_concepto int,
@@ -75,7 +75,7 @@ actualizacion date,
 estado boolean
 );
 
-drop table matriculas;
+-- drop table matriculas;
 create table matriculas(
 id int primary key auto_increment,
 id_estudiante int,
@@ -90,7 +90,7 @@ actualizacion date,
 estado varchar(20)
 );
 
-drop table matricula_detalle;
+-- drop table matricula_detalle;
 create table matricula_detalle(
 id int primary key auto_increment,
 id_matricula int,
@@ -99,7 +99,7 @@ monto decimal(6,2),
 estado varchar(20)
 );
 
-drop table pagos;
+-- drop table pagos;
 create table pagos (
 id int primary key auto_increment,
 id_matricula int,
@@ -112,7 +112,7 @@ actualizacion date,
 estado varchar(20)
 );
 
-drop table pagos_detalle;
+-- drop table pagos_detalle;
 create table pagos_detalle(
 id int primary key auto_increment,
 id_pago int,
@@ -122,7 +122,7 @@ monto double(6,2),
 estado varchar(20)
 );
 
-drop trigger insert_pagos_detalle;
+-- drop trigger insert_pagos_detalle;
 delimiter $$
 create trigger insert_pagos_detalle
 after insert on pagos_detalle
@@ -135,7 +135,7 @@ end;
 $$
 delimiter ;
 
-drop trigger insert_matriculas;
+-- drop trigger insert_matriculas;
 delimiter $$
 create trigger insert_matriculas
 after insert on matriculas
@@ -208,8 +208,3 @@ select * from matriculas;
 select * from matricula_detalle;
 select * from pagos;
 select * from pagos_detalle;
-
-delete from conceptos_detalle where id=25;
-update matricula_detalle
-set estado='PENDIENTE'
-where id=1;
