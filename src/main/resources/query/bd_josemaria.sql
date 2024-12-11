@@ -156,6 +156,29 @@ begin
 end $$
 delimiter ;
 
+truncate table usuarios;
+INSERT INTO usuarios (rol, documento, numero, nombre, apellido, direccion, telefono, email, password, genero, nacimiento, estado) VALUES
+('ADMIN', 'DNI', '40123456', 'Juan', 'Perez', 'Av. Siempre Viva 123', '900123456', 'perez@example.com', '$2a$10$bFojXUEilw/VFpWKxxEEmu3URsc6BUA3.2GdG/jC68CwoCxETUQY.', 'M', '1992-05-14', true),
+('CONTABILIDAD', 'CEX', '41234567', 'Maria', 'Lopez', 'Calle Falsa 456', '901234567', 'lopez@example.com', '456', 'F', '1993-07-21', true),
+('TESORERIA', 'PAS', '42345678', 'Carlos', 'Garcia', 'Calle Real 789', '902345678', 'garcia@example.com', '789', 'M', '1991-09-10', true),
+('FACTURACION', 'DNI', '43456789', 'Ana', 'Gomez', 'Av. del Sol 321', '903456789', 'gomez@example.com', '987', 'F', '1994-03-18', true),
+('SECRETARIA', 'CEX', '44567890', 'Luis', 'Martinez', 'Calle Luna 654', '904567890', 'martinez@example.com', '654', 'M', '1990-12-25', true),
+('ADMIN', 'PAS', '45678901', 'Elena', 'Rodriguez', 'Av. Marte 987', '905678901', 'rodriguez@example.com', '321', 'F', '2000-01-30', true),
+('CONTABILIDAD', 'DNI', '46789012', 'Pedro', 'Hernandez', 'Calle Estrella 123', '906789012', 'hernandez@example.com', '432', 'M', '1998-11-11', true),
+('TESORERIA', 'CEX', '47890123', 'Lucia', 'Sanchez', 'Av. Cometa 456', '907890123', 'sanchez@example.com', '543', 'F', '2001-02-12', true),
+('FACTURACION', 'PAS', '48901234', 'Javier', 'Torres', 'Calle Astro 789', '908901234', 'torres@example.com', '654', 'M', '1996-06-06', true),
+('SECRETARIA', 'DNI', '49012345', 'Laura', 'Ramirez', 'Av. Planeta 321', '909012345', 'ramirez@example.com', '765', 'F', '1995-08-24', true),
+('ADMIN', 'CEX', '50123456', 'Miguel', 'Flores', 'Calle Universo 654', '900123457', 'flores@example.com', '876', 'M', '1997-04-02', true),
+('CONTABILIDAD', 'PAS', '51234567', 'Carmen', 'Diaz', 'Av. Galaxia 987', '901234568', 'diaz@example.com', '987', 'F', '2003-10-19', true),
+('TESORERIA', 'DNI', '52345678', 'Raul', 'Morales', 'Calle Via Lactea 123', '902345679', 'morales@example.com', '098', 'M', '2002-03-31', true),
+('FACTURACION', 'CEX', '53456789', 'Sara', 'Ortega', 'Av. Nebulosa 456', '903456780', 'ortega@example.com', '210', 'F', '1994-12-12', true),
+('SECRETARIA', 'PAS', '54567890', 'Diego', 'Vargas', 'Calle Estrella Fugaz 789', '904567891', 'vargas@example.com', '321', 'M', '2000-07-20', true),
+('ADMIN', 'DNI', '55678901', 'Patricia', 'Jimenez', 'Av. Sol Naciente 321', '905678902', 'jimenez@example.com', '432', 'F', '2001-11-08', true),
+('CONTABILIDAD', 'CEX', '56789012', 'Felipe', 'Suarez', 'Calle Sol Poniente 654', '906789013', 'suarez@example.com', '543', 'M', '1999-06-15', true),
+('TESORERIA', 'PAS', '57890123', 'Marta', 'Ramos', 'Av. Aurora 987', '907890124', 'ramos@example.com', '654', 'F', '1998-09-01', true),
+('FACTURACION', 'DNI', '58901234', 'Sergio', 'Ruiz', 'Calle Viento 123', '908901235', 'ruiz@example.com', '765', 'M', '2003-05-11', true),
+('SECRETARIA', 'CEX', '59012345', 'Isabel', 'Silva', 'Av. Lluvia 456', '909012346', 'silva@example.com', '876', 'F', '2004-08-29', true);
+
 INSERT INTO apoderados (documento, numero, nombre, apellido, direccion, telefono, relacion, email, password, nacimiento, estado) VALUES 
 ('DNI', '34567890', 'Juan Carlos', 'Pérez López', 'Av. Las Flores 1234', '912345678', 'PADRE', 'perez@gmail.com', '3456Lopez', '1985-03-15', TRUE),
 ('PASS', '0023456789', 'Ana María', 'González Ruiz', 'Calle del Sol 4567', '949876543', 'MADRE', 'gonzalez@hotmail.com', '0023Ruiz', '1990-07-22', TRUE),
