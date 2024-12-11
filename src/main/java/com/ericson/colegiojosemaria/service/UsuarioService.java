@@ -4,6 +4,7 @@ import com.ericson.colegiojosemaria.interfaces.IUsuario;
 import com.ericson.colegiojosemaria.model.Usuario;
 import com.ericson.colegiojosemaria.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +57,11 @@ public class UsuarioService implements IUsuario {
             response.put("status", HttpStatus.INTERNAL_SERVER_ERROR);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+    @Override
+    public Optional<Usuario> obtenerUsuarioPorEmail(String email) {
+        return usuarioRepository.findOneByEmail(email);
     }
 
     private String validarUsuario(Usuario usuario) {
