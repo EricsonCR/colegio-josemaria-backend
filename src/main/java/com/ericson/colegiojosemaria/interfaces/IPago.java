@@ -8,4 +8,5 @@ import java.util.Map;
 public interface IPago {
     ResponseEntity<Map<String,Object>> listar();
     ResponseEntity<Map<String, Object>> crear(Pago pago);
+    ResponseEntity<Map<String, Object>> buscarPorId(long id);
 }

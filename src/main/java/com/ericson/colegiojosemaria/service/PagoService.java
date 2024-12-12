@@ -10,10 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -69,6 +66,30 @@ public class PagoService implements IPago {
             response.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+    @Override
+    public ResponseEntity<Map<String, Object>> buscarPorId(long id) {
+        Map<String, Object> response = new HashMap<>();
+        List<Pago> lista = new ArrayList<>();
+        try {
+            Optional<Pago> pago = pagoRepository.findById(id);
+            if(pago.isPresent()) {
+                lista.add(pago.get());
+                response.put("data", lista);
+                response.put("message", "Lista de pagos");
+                response.put("status", HttpStatus.OK.value());
+
+            }
+            response.put("data", lista);
+            response.put("message", "Pago no encontrado");
+            response.put("status", HttpStatus.NOT_FOUND.value());
+        } catch (Exception e) {
+            response.put("data", lista);
+            response.put("message", e.getMessage());
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     private String validarPago(Pago pago) {

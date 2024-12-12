@@ -12,4 +12,6 @@ public interface IUsuario {
     ResponseEntity<Map<String, Object>> crear(Usuario usuario);
 
     Optional<Usuario> obtenerUsuarioPorEmail(String email);
+
+    ResponseEntity<Map<String, Object>> registrar(Usuario usuario);
 }

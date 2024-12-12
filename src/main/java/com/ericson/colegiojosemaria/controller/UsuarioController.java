@@ -23,4 +23,9 @@ public class UsuarioController {
     public ResponseEntity<Map<String, Object>> crear(@RequestBody Usuario usuario) {
         return usuarioService.crear(usuario);
     }
+
+    @PostMapping("/registrar")
+    public ResponseEntity<Map<String, Object>> registrar(@RequestBody Usuario usuario) {
+        return usuarioService.registrar(usuario);
+    }
 }

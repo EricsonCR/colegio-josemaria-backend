@@ -64,7 +64,30 @@ public class UsuarioService implements IUsuario {
         return usuarioRepository.findOneByEmail(email);
     }
 
+    @Override
+    public ResponseEntity<Map<String, Object>> registrar(Usuario usuario) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String message = validarUsuario(usuario);
+            if (message.equals("OK")) {
+                Usuario user = usuarioRepository.save(usuario);
+                response.put("data", user);
+                response.put("message", "Usuario registrado correctamente");
+                response.put("status", HttpStatus.CREATED.value());
+            } else {
+                response.put("data", new Usuario());
+                response.put("message", message);
+                response.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
+            }
+        } catch (Exception e) {
+            response.put("data", new Usuario());
+            response.put("message", e.toString());
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     private String validarUsuario(Usuario usuario) {
-        return "OK";
+        return "OKK";
     }
 }

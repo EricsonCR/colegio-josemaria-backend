@@ -24,4 +24,9 @@ public class PagoController {
     public ResponseEntity<Map<String, Object>> crearPago(@RequestBody Pago pago) {
         return pagoService.crear(pago);
     }
+
+    @GetMapping("/buscarPorId/{id}")
+    public ResponseEntity<Map<String, Object>> buscarPorId(@PathVariable Long id) {
+        return pagoService.buscarPorId(id);
+    }
 }
