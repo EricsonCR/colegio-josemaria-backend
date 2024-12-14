@@ -13,10 +13,10 @@ import java.util.Map;
 
 public class TokenSecurity {
     private final static String TOKEN_SECRETO = "1fKHVdiSfT5cmFpmWw2xmkIIBKcvJAOG";
-    private final static Long TOKEN_DURACION_SEGUNDOS = 3_600L;
+    private final static Long TOKEN_DURACION_SEGUNDOS = 3_600_000L; // 1hora en milisegundos
 
     public static String crearToken(String nombre, String email) {
-        long expirationTime = TOKEN_DURACION_SEGUNDOS * 1000;
+        long expirationTime = TOKEN_DURACION_SEGUNDOS;
         Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
 
         Map<String, Object> claims = new HashMap<>();

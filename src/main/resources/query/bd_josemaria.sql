@@ -158,7 +158,7 @@ delimiter ;
 
 truncate table usuarios;
 INSERT INTO usuarios (rol, documento, numero, nombre, apellido, direccion, telefono, email, password, genero, nacimiento, estado) VALUES
-('ADMIN', 'DNI', '40123456', 'Juan', 'Perez', 'Av. Siempre Viva 123', '900123456', 'perez@example.com', '$2a$10$bFojXUEilw/VFpWKxxEEmu3URsc6BUA3.2GdG/jC68CwoCxETUQY.', 'M', '1992-05-14', true),
+('ADMIN', 'DNI', '40123456', 'Juan', 'Perez', 'Av. Siempre Viva 123', '900123456', 'perez@example.com', '$2a$10$bFojXUEilw/VFpWKxxEEmu3URsc6BUA3.2GdG/jC68CwoCxETUQY.', 'M', '1992-05-14', true), -- clave = 123456
 ('CONTABILIDAD', 'CEX', '41234567', 'Maria', 'Lopez', 'Calle Falsa 456', '901234567', 'lopez@example.com', '456', 'F', '1993-07-21', true),
 ('TESORERIA', 'PAS', '42345678', 'Carlos', 'Garcia', 'Calle Real 789', '902345678', 'garcia@example.com', '789', 'M', '1991-09-10', true),
 ('FACTURACION', 'DNI', '43456789', 'Ana', 'Gomez', 'Av. del Sol 321', '903456789', 'gomez@example.com', '987', 'F', '1994-03-18', true),
@@ -231,3 +231,4 @@ select * from matriculas;
 select * from matricula_detalle;
 select * from pagos;
 select * from pagos_detalle;
+delete from usuarios where id=23; 
