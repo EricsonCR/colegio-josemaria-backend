@@ -1,6 +1,7 @@
 package com.ericson.colegiojosemaria.controller;
 
 import com.ericson.colegiojosemaria.dto.AuthDto;
+import com.ericson.colegiojosemaria.interfaces.IAuth;
 import com.ericson.colegiojosemaria.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+    private final IAuth authService;
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody AuthDto authDto) {
