@@ -31,10 +31,16 @@ public class AuthService implements IAuth {
     @Override
     public ResponseEntity<Map<String, Object>> login(AuthDto authDto) {
         Map<String, Object> response = new HashMap<>();
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDto.getEmail(), authDto.getPassword()));
-        Usuario usuario = usuarioRepository.findOneByEmail(authDto.getEmail()).orElse(new Usuario());
-        String token = jwtService.getToken(new UserDetailsDto(usuario.getEmail(), usuario.getPassword()));
-        response.put("token", token);
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDto.getEmail(), authDto.getPassword()));
+            Usuario usuario = usuarioRepository.findOneByEmail(authDto.getEmail()).orElse(new Usuario());
+            String token = jwtService.getToken(new UserDetailsDto(usuario.getEmail(), usuario.getPassword()));
+            response.put("message", token);
+            response.put("status", HttpStatus.OK.value());
+        } catch (Exception e) {
+            response.put("message", e.getMessage());
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
         return ResponseEntity.ok(response);
     }
 
@@ -58,10 +64,11 @@ public class AuthService implements IAuth {
         try {
             for (AuthDto authDto : validations) {
                 if (authDto.getCode().equals(code)) {
-                    usuario.setEmail(authDto.getEmail());
-                    usuario.setPassword(passwordEncoder.encode(authDto.getPassword()));
+                    usuario.setNumero(authDto.getNumero());
                     usuario.setNombre(authDto.getNombre());
                     usuario.setApellido(authDto.getApellido());
+                    usuario.setEmail(authDto.getEmail());
+                    usuario.setPassword(passwordEncoder.encode(authDto.getPassword()));
                     usuarioRepository.save(usuario);
                     String token = jwtService.getToken(new UserDetailsDto(usuario.getEmail(), usuario.getPassword()));
                     response.put("message", token);

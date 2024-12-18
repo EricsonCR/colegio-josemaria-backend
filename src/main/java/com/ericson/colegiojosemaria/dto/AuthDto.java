@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthDto {
+    private String documento;
+    private String numero;
     private String nombre;
     private String apellido;
     private String email;
