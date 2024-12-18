@@ -9,10 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,32 +33,23 @@ public class UsuarioService implements IUsuario {
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> crear(Usuario usuario) {
+    public ResponseEntity<Map<String, Object>> buscarPorEmail(String email) {
         Map<String, Object> response = new HashMap<>();
+        List<Usuario> lista = new ArrayList<>();
         try {
-            String message = validarUsuario(usuario);
-            if (message.equals("OK")) {
-                Usuario user = usuarioRepository.save(usuario);
-                response.put("data", user);
-                response.put("message", "Usuario agregado correctamente");
-                response.put("status", HttpStatus.CREATED.value());
-                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            Optional<Usuario> optional = usuarioRepository.findOneByEmail(email);
+            if (optional.isPresent()) {
+                lista.add(optional.get());
+                response.put("data", lista);
+                response.put("message", "Usuario encontrado");
+                response.put("status", HttpStatus.OK.value());
             }
-            response.put("data", new Usuario());
-            response.put("message", message);
-            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         } catch (Exception e) {
-            response.put("data", new Usuario());
-            response.put("message", e.toString());
-            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            response.put("data", new ArrayList<>());
+            response.put("message", e.getMessage());
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
-    }
-
-    @Override
-    public Optional<Usuario> obtenerUsuarioPorEmail(String email) {
-        return usuarioRepository.findOneByEmail(email);
+        return ResponseEntity.ok(response);
     }
 
     @Override

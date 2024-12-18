@@ -31,13 +31,20 @@ public class AuthService implements IAuth {
     @Override
     public ResponseEntity<Map<String, Object>> login(AuthDto authDto) {
         Map<String, Object> response = new HashMap<>();
+        Map<String, Object> data = new HashMap<>();
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDto.getEmail(), authDto.getPassword()));
             Usuario usuario = usuarioRepository.findOneByEmail(authDto.getEmail()).orElse(new Usuario());
             String token = jwtService.getToken(new UserDetailsDto(usuario.getEmail(), usuario.getPassword()));
-            response.put("message", token);
+            data.put("token", token);
+            data.put("nombre", usuario.getNombre());
+            data.put("apellido", usuario.getApellido());
+            data.put("email", usuario.getEmail());
+            response.put("data", data);
+            response.put("message", "Authentication Successful");
             response.put("status", HttpStatus.OK.value());
         } catch (Exception e) {
+            response.put("data", new HashMap<>());
             response.put("message", e.getMessage());
             response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
@@ -46,20 +53,44 @@ public class AuthService implements IAuth {
 
     @Override
     public ResponseEntity<Map<String, Object>> generated(AuthDto authDto) {
-        Random rand = new Random();
-        int code = 100000 + rand.nextInt(900000);
-        authDto.setCode(Integer.toString(code));
-        EmailDto emailDto = new EmailDto();
-        emailDto.setToUser(authDto.getEmail());
-        emailDto.setSubject("Generacion de codigo para validar registro de usuario");
-        emailDto.setBody(generatedBodyEmail(authDto));
-        validations.add(authDto);
-        return emailService.sendEmail(emailDto);
+        Map<String, Object> response = new HashMap<>();
+        String message = validations(authDto);
+        if (message.equals("OK")) {
+            Optional<Usuario> optional = usuarioRepository.findOneByEmail(authDto.getEmail());
+            if (optional.isEmpty()) {
+                Random rand = new Random();
+                int code = 100000 + rand.nextInt(900000);
+                authDto.setCode(Integer.toString(code));
+                EmailDto emailDto = new EmailDto();
+                emailDto.setToUser(authDto.getEmail());
+                emailDto.setSubject("Generacion de codigo para validar registro de usuario");
+                emailDto.setBody(generatedBodyEmail(authDto));
+                validations.add(authDto);
+                return emailService.sendEmail(emailDto);
+            }
+            response.put("data", new HashMap<>());
+            response.put("message", "Email already exists");
+            response.put("status", HttpStatus.FOUND.value());
+            return ResponseEntity.ok(response);
+        }
+        response.put("data", new HashMap<>());
+        response.put("message", message);
+        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return ResponseEntity.ok(response);
+    }
+
+    private String validations(AuthDto authDto) {
+        String email = authDto.getEmail();
+        if (email.contains("@") && email.contains(".com")) {
+            return "OK";
+        }
+        return "Email field is not correct";
     }
 
     @Override
     public ResponseEntity<Map<String, Object>> register(String code) {
         Map<String, Object> response = new HashMap<>();
+        Map<String, Object> data = new HashMap<>();
         Usuario usuario = new Usuario();
         try {
             for (AuthDto authDto : validations) {
@@ -71,12 +102,17 @@ public class AuthService implements IAuth {
                     usuario.setPassword(passwordEncoder.encode(authDto.getPassword()));
                     usuarioRepository.save(usuario);
                     String token = jwtService.getToken(new UserDetailsDto(usuario.getEmail(), usuario.getPassword()));
-                    response.put("message", token);
+                    data.put("token", token);
+                    data.put("nombre", usuario.getNombre());
+                    data.put("apellido", usuario.getApellido());
+                    data.put("email", usuario.getEmail());
+                    response.put("data", data);
+                    response.put("message", "Successfully registered user");
                     response.put("status", HttpStatus.OK.value());
                     return ResponseEntity.ok(response);
                 }
             }
-            response.put("message", "User not found");
+            response.put("message", "This code is not related to any user");
             response.put("status", HttpStatus.NOT_FOUND.value());
         } catch (Exception e) {
             response.put("message", e.getMessage());

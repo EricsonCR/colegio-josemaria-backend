@@ -20,13 +20,18 @@ public class UsuarioController {
         return usuarioService.listar();
     }
 
-    @PostMapping("/crear")
-    public ResponseEntity<Map<String, Object>> crear(@RequestBody Usuario usuario) {
-        return usuarioService.crear(usuario);
-    }
+//    @PostMapping("/crear")
+//    public ResponseEntity<Map<String, Object>> crear(@RequestBody Usuario usuario) {
+//        return usuarioService.crear(usuario);
+//    }
 
     @PostMapping("/registrar")
     public ResponseEntity<Map<String, Object>> registrar(@RequestBody Usuario usuario) {
         return usuarioService.registrar(usuario);
+    }
+
+    @GetMapping("/buscarPorEmail/{email}")
+    public ResponseEntity<Map<String, Object>> buscarPorEmail(@PathVariable String email) {
+        return usuarioService.buscarPorEmail(email);
     }
 }
