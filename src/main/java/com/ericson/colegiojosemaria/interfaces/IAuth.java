@@ -8,5 +8,7 @@ import java.util.Map;
 public interface IAuth {
     ResponseEntity<Map<String, Object>> login(AuthDto authDto);
 
-    ResponseEntity<Map<String, Object>> register(AuthDto authDto);
+    ResponseEntity<Map<String, Object>> generated(AuthDto authDto);
+
+    ResponseEntity<Map<String, Object>> register(String code);
 }

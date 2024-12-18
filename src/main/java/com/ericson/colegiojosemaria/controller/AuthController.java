@@ -2,7 +2,6 @@ package com.ericson.colegiojosemaria.controller;
 
 import com.ericson.colegiojosemaria.dto.AuthDto;
 import com.ericson.colegiojosemaria.interfaces.IAuth;
-import com.ericson.colegiojosemaria.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,8 +21,13 @@ public class AuthController {
         return authService.login(authDto);
     }
 
+    @PostMapping("/generated")
+    public ResponseEntity<Map<String, Object>> generated(@RequestBody AuthDto authDto) {
+        return authService.generated(authDto);
+    }
+
     @PostMapping("/register")
-    public ResponseEntity<Map<String, Object>> register(@RequestBody AuthDto authDto) {
-        return authService.register(authDto);
+    public ResponseEntity<Map<String, Object>> register(@RequestBody String code) {
+        return authService.register(code);
     }
 }

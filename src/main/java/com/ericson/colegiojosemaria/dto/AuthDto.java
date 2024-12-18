@@ -12,4 +12,5 @@ public class AuthDto {
     private String apellido;
     private String email;
     private String password;
+    private String code;
 }

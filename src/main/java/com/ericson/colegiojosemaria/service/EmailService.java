@@ -6,6 +6,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -33,8 +34,14 @@ public class EmailService implements IEmail {
         mailMessage.setTo(emailDto.getToUser());
         mailMessage.setSubject(emailDto.getSubject());
         mailMessage.setText(emailDto.getBody());
-        mailSender.send(mailMessage);
-        response.put("message", "Email send successful");
+        try {
+            mailSender.send(mailMessage);
+            response.put("message", "Email send successful");
+            response.put("status", HttpStatus.OK.value());
+        } catch (Exception e) {
+            response.put("message", e.getMessage());
+            response.put("status", 0);
+        }
         return ResponseEntity.ok(response);
     }
 
