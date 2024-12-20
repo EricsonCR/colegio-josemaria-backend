@@ -1,8 +1,13 @@
 package com.ericson.colegiojosemaria.service;
 
+import com.ericson.colegiojosemaria.dto.EmailDto;
 import com.ericson.colegiojosemaria.interfaces.IReporte;
+import com.ericson.colegiojosemaria.model.Estudiante;
+import com.ericson.colegiojosemaria.model.Matricula;
 import com.ericson.colegiojosemaria.model.Pago;
 import com.ericson.colegiojosemaria.model.PagoDetalle;
+import com.ericson.colegiojosemaria.repository.EstudianteRepository;
+import com.ericson.colegiojosemaria.repository.MatriculaRepository;
 import com.ericson.colegiojosemaria.repository.PagoDetalleRepository;
 import com.ericson.colegiojosemaria.repository.PagoRepository;
 import com.itextpdf.text.*;
@@ -17,6 +22,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,75 +36,128 @@ public class ReporteService implements IReporte {
 
     private final PagoDetalleRepository pagoDetalleRepository;
     private final PagoRepository pagoRepository;
+    private final MatriculaRepository matriculaRepository;
+    private final EstudianteRepository estudianteRepository;
+    private final EmailService emailService;
 
     @Override
     public ResponseEntity<Map<String, Object>> reportePagoId(long id) throws DocumentException {
         Pago pago = new Pago();
-        Optional<Pago> optional = pagoRepository.findById(id);
-        if (optional.isPresent()) {
-            pago = optional.get();
+        Optional<Pago> optionalPago = pagoRepository.findById(id);
+        if (optionalPago.isPresent()) {
+            pago = optionalPago.get();
+            List<PagoDetalle> pagoDetalle = pagoDetalleRepository.listarPorIdPago(id);
+            pago.setPagoDetalle(pagoDetalle);
         }
-        List<PagoDetalle> pagoDetalle = pagoDetalleRepository.listarPorIdPago(id);
+
+        Estudiante estudiante = new Estudiante();
+        Optional<Matricula> optionalMatricula = matriculaRepository.findById(pago.getId_matricula());
+        if (optionalMatricula.isPresent()) {
+            Matricula matricula = optionalMatricula.get();
+            Optional<Estudiante> optionalEstudiante = estudianteRepository.findById((long) matricula.getId_estudiante());
+            if (optionalEstudiante.isPresent()) {
+                estudiante = optionalEstudiante.get();
+            }
+        }
+
+        ByteArrayOutputStream baos = designPdf(pago);
+        String filePath = savePdf(baos, pago.getId());
+
+        Path path = Paths.get(filePath);
+        if (Files.exists(path)) {
+            File file = path.toFile();
+            EmailDto emailDto = new EmailDto();
+            emailDto.setToUser(estudiante.getEmail());
+            emailDto.setSubject("Reporte de pago");
+            emailDto.setBody("");
+            return emailService.sendEmailWithFile(emailDto, file);
+        }
+
+        return ResponseEntity.ok(new HashMap<>());
+    }
+
+    private String savePdf(ByteArrayOutputStream baos, long id) {
+        String directoryPath = "src/main/resources/static/pdf";
+        String fileName = "reporte_pago_" + id + ".pdf";
+        File directory = new File(directoryPath);
+
+        if (!directory.exists()) directory.mkdirs();
+
+        File pdfFile = new File(directory, fileName);
+
+        try (FileOutputStream fos = new FileOutputStream(pdfFile)) {
+            fos.write(baos.toByteArray());
+            return directoryPath + File.separator + fileName;
+        } catch (IOException e) {
+            return "";
+        }
+    }
+
+    private ByteArrayOutputStream designPdf(Pago pago) throws DocumentException {
 
         Document document = new Document();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         PdfWriter.getInstance(document, stream);
         document.open();
 
-        Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD, BaseColor.BLACK);
+        PdfPTable headerTable = new PdfPTable(new float[]{2, 6});
+        PdfPTable detailTable = new PdfPTable(new float[]{2, 8, 8});
+        Paragraph p = new Paragraph();
+        PdfPCell cell = new PdfPCell();
+
+        Font titleFont = new Font(Font.FontFamily.HELVETICA, 24, Font.BOLD, BaseColor.BLACK);
         Paragraph title = new Paragraph("Reporte de Pago", titleFont);
         title.setAlignment(Element.ALIGN_CENTER);
         document.add(title);
 
-        document.add(new Paragraph("Número de Pago: " + pago.getId()));
-        document.add(new Paragraph("Monto Total: " + pago.getMonto()));
-        document.add(new Paragraph("Numero OP: " + pago.getNumero_op()));
-        document.add(new Paragraph("Metodo pago: " + pago.getMetodo_pago()));
-        document.add(new Chunk("\n"));
+        p.setSpacingBefore(20);
+        document.add(p);
 
-        PdfPTable table = new PdfPTable(2); // 2 columnas
-        table.setWidthPercentage(100);
-        table.setSpacingBefore(10);
+        titleFont.setSize(14);
+        headerTable.setWidthPercentage(100);
+        cell.setBorder(Rectangle.NO_BORDER);
+        cell.setPhrase(new Phrase("Numero de Pago", titleFont));
+        headerTable.addCell(cell);
+        cell.setPhrase(new Phrase(": " + pago.getId()));
+        headerTable.addCell(cell);
+        cell.setPhrase(new Phrase("Monto Total", titleFont));
+        headerTable.addCell(cell);
+        cell.setPhrase(new Phrase(": " + pago.getMonto()));
+        headerTable.addCell(cell);
+        cell.setPhrase(new Phrase("Numero de OP", titleFont));
+        headerTable.addCell(cell);
+        cell.setPhrase(new Phrase(": " + pago.getNumero_op()));
+        headerTable.addCell(cell);
+        cell.setPhrase(new Phrase("Metodo de Pago", titleFont));
+        headerTable.addCell(cell);
+        cell.setPhrase(new Phrase(": " + pago.getMetodo_pago()));
+        headerTable.addCell(cell);
+        document.add(headerTable);
 
-        PdfPCell header = new PdfPCell();
-        header.setPadding(10f);
-        header.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        p.setSpacingBefore(20);
+        document.add(p);
 
-        header.setPhrase(new Phrase("Descripcion"));
-        table.addCell(header);
-        header.setPhrase(new Phrase("Monto"));
-        table.addCell(header);
-
-        header.setBackgroundColor(BaseColor.WHITE);
-
-        for (PagoDetalle detalle : pagoDetalle) {
-            header.setPhrase(new Phrase(detalle.getConcepto()));
-            table.addCell(header);
-            header.setPhrase(new Phrase(String.valueOf(detalle.getMonto())));
-            table.addCell(header);
+        detailTable.setWidthPercentage(100);
+        cell.setBorder(Rectangle.BOX);
+        cell.setPadding(10f);
+        cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        cell.setPhrase(new Phrase("ID", titleFont));
+        detailTable.addCell(cell);
+        cell.setPhrase(new Phrase("Descripcion", titleFont));
+        detailTable.addCell(cell);
+        cell.setPhrase(new Phrase("Monto", titleFont));
+        detailTable.addCell(cell);
+        cell.setBackgroundColor(BaseColor.WHITE);
+        for (PagoDetalle detalle : pago.getPagoDetalle()) {
+            cell.setPhrase(new Phrase(String.valueOf(detalle.getId_matricula_detalle())));
+            detailTable.addCell(cell);
+            cell.setPhrase(new Phrase(detalle.getConcepto()));
+            detailTable.addCell(cell);
+            cell.setPhrase(new Phrase(String.valueOf(detalle.getMonto())));
+            detailTable.addCell(cell);
         }
-
-        document.add(table);
+        document.add(detailTable);
         document.close();
-
-        String directoryPath = "src/main/resources/static/pdf"; // Cambia esta ruta según lo que desees
-        File directory = new File(directoryPath);
-
-        // Si el directorio no existe, créalo
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-
-        // Crea el archivo de salida
-        File pdfFile = new File(directory, "reporte_pago_" + id + ".pdf");
-
-        // Guardar el PDF en el servidor
-        try (FileOutputStream fos = new FileOutputStream(pdfFile)) {
-            fos.write(stream.toByteArray());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return ResponseEntity.ok(new HashMap<>());
+        return stream;
     }
 }
