@@ -1,21 +1,13 @@
 package com.ericson.colegiojosemaria.service;
 
-import com.ericson.colegiojosemaria.dto.EmailDto;
 import com.ericson.colegiojosemaria.interfaces.IReporte;
-import com.ericson.colegiojosemaria.model.Estudiante;
-import com.ericson.colegiojosemaria.model.Matricula;
 import com.ericson.colegiojosemaria.model.Pago;
 import com.ericson.colegiojosemaria.model.PagoDetalle;
-import com.ericson.colegiojosemaria.repository.EstudianteRepository;
-import com.ericson.colegiojosemaria.repository.MatriculaRepository;
-import com.ericson.colegiojosemaria.repository.PagoDetalleRepository;
-import com.ericson.colegiojosemaria.repository.PagoRepository;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
