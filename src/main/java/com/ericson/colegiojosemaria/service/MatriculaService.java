@@ -89,19 +89,19 @@ public class MatriculaService implements IMatricula {
         try {
             String message = validarMatricula(matricula);
             if (message.equals("OK")) {
-                response.put("data", matriculaRepository.save(matricula));
-                response.put("message", "Matricula Creada correctamente");
-                response.put("status", HttpStatus.CREATED);
-                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+                matriculaRepository.save(matricula);
+                response.put("message", "Successful registration");
+                response.put("status", HttpStatus.OK.value());
+                return ResponseEntity.ok(response);
             }
-            response.put("data", new Matricula());
             response.put("message", message);
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         } catch (Exception e) {
-            response.put("data", new Matricula());
-            response.put("message", e.toString());
+            System.out.println(e.getMessage());
+            response.put("message", "Internal error");
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
-        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        return ResponseEntity.ok(response);
     }
 
     private String validarMatricula(Matricula matricula) {

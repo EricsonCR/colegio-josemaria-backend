@@ -66,7 +66,15 @@ public class AuthService implements IAuth {
                 emailDto.setSubject("Generacion de codigo para validar registro de usuario");
                 emailDto.setBody(generatedBodyEmail(authDto));
                 validations.add(authDto);
-                return emailService.sendEmail(emailDto);
+                if (emailService.sendEmail(emailDto)) {
+                    response.put("message", "Email send successful");
+                    response.put("status", HttpStatus.OK.value());
+                    return ResponseEntity.ok(response);
+                } else {
+                    response.put("message", "Email send failed");
+                    response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+                    return ResponseEntity.ok(response);
+                }
             }
             response.put("data", new HashMap<>());
             response.put("message", "Email already exists");
@@ -95,6 +103,7 @@ public class AuthService implements IAuth {
         try {
             for (AuthDto authDto : validations) {
                 if (authDto.getCode().equals(code)) {
+                    usuario.setDocumento(authDto.getDocumento());
                     usuario.setNumero(authDto.getNumero());
                     usuario.setNombre(authDto.getNombre());
                     usuario.setApellido(authDto.getApellido());
@@ -115,7 +124,8 @@ public class AuthService implements IAuth {
             response.put("message", "This code is not related to any user");
             response.put("status", HttpStatus.NOT_FOUND.value());
         } catch (Exception e) {
-            response.put("message", e.getMessage());
+            System.out.println(e.getMessage());
+            response.put("message", "Error internal");
             response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
         return ResponseEntity.ok(response);

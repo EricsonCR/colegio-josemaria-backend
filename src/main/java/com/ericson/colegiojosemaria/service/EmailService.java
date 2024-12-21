@@ -27,30 +27,26 @@ public class EmailService implements IEmail {
     private String userFrom;
 
     @Override
-    public ResponseEntity<Map<String, Object>> sendEmail(EmailDto emailDto) {
-        Map<String, Object> response = new HashMap<>();
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setFrom(userFrom);
-        mailMessage.setTo(emailDto.getToUser());
-        mailMessage.setSubject(emailDto.getSubject());
-        mailMessage.setText(emailDto.getBody());
+    public boolean sendEmail(EmailDto emailDto) {
         try {
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+            mailMessage.setFrom(userFrom);
+            mailMessage.setTo(emailDto.getToUser());
+            mailMessage.setSubject(emailDto.getSubject());
+            mailMessage.setText(emailDto.getBody());
             mailSender.send(mailMessage);
-            response.put("message", "Email send successful");
-            response.put("status", HttpStatus.OK.value());
+            return true;
         } catch (Exception e) {
-            response.put("message", e.getMessage());
-            response.put("status", 0);
+            System.out.println(e.getMessage());
         }
-        return ResponseEntity.ok(response);
+        return false;
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> sendEmailWithFile(EmailDto emailDto, File file) {
-        Map<String, Object> response = new HashMap<>();
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-        String encode = StandardCharsets.UTF_8.name();
+    public boolean sendEmail(EmailDto emailDto, File file) {
         try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            String encode = StandardCharsets.UTF_8.name();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, encode);
             mimeMessageHelper.setFrom(userFrom);
             mimeMessageHelper.setTo(emailDto.getToUser());
@@ -58,11 +54,10 @@ public class EmailService implements IEmail {
             mimeMessageHelper.setText(emailDto.getBody(), true);
             mimeMessageHelper.addAttachment(file.getName(), file);
             mailSender.send(mimeMessage);
-            response.put("message", "Email with file send successful");
-            response.put("file", file.exists() ? file.getName() : "");
-            return ResponseEntity.ok(response);
+            return true;
         } catch (MessagingException e) {
-            throw new RuntimeException(e);
+            System.out.println(e.getMessage());
         }
+        return false;
     }
 }

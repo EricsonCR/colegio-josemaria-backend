@@ -25,55 +25,25 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ReporteService implements IReporte {
 
-    private final PagoDetalleRepository pagoDetalleRepository;
-    private final PagoRepository pagoRepository;
-    private final MatriculaRepository matriculaRepository;
-    private final EstudianteRepository estudianteRepository;
-    private final EmailService emailService;
-
     @Override
-    public ResponseEntity<Map<String, Object>> reportePagoId(long id) throws DocumentException {
-        Pago pago = new Pago();
-        Optional<Pago> optionalPago = pagoRepository.findById(id);
-        if (optionalPago.isPresent()) {
-            pago = optionalPago.get();
-            List<PagoDetalle> pagoDetalle = pagoDetalleRepository.listarPorIdPago(id);
-            pago.setPagoDetalle(pagoDetalle);
-        }
-
-        Estudiante estudiante = new Estudiante();
-        Optional<Matricula> optionalMatricula = matriculaRepository.findById(pago.getId_matricula());
-        if (optionalMatricula.isPresent()) {
-            Matricula matricula = optionalMatricula.get();
-            Optional<Estudiante> optionalEstudiante = estudianteRepository.findById((long) matricula.getId_estudiante());
-            if (optionalEstudiante.isPresent()) {
-                estudiante = optionalEstudiante.get();
+    public File reportePago(Pago pago) {
+        try {
+            ByteArrayOutputStream baos = designPdf(pago);
+            String filePath = savePdf(baos, pago.getId());
+            Path path = Paths.get(filePath);
+            if (Files.exists(path)) {
+                return path.toFile();
             }
+        } catch (DocumentException e) {
+            System.err.println(e.getMessage());
         }
 
-        ByteArrayOutputStream baos = designPdf(pago);
-        String filePath = savePdf(baos, pago.getId());
-
-        Path path = Paths.get(filePath);
-        if (Files.exists(path)) {
-            File file = path.toFile();
-            EmailDto emailDto = new EmailDto();
-            emailDto.setToUser(estudiante.getEmail());
-            emailDto.setSubject("Reporte de pago");
-            emailDto.setBody("");
-            return emailService.sendEmailWithFile(emailDto, file);
-        }
-
-        return ResponseEntity.ok(new HashMap<>());
+        return null;
     }
 
     private String savePdf(ByteArrayOutputStream baos, long id) {

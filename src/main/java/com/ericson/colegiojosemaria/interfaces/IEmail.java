@@ -8,7 +8,8 @@ import java.io.File;
 import java.util.Map;
 
 public interface IEmail {
-    ResponseEntity<Map<String, Object>> sendEmail(EmailDto emailDto);
 
-    ResponseEntity<Map<String, Object>> sendEmailWithFile(EmailDto emailDto, File file);
+    boolean sendEmail(EmailDto emailDto);
+
+    boolean sendEmail(EmailDto emailDto, File file);
 }

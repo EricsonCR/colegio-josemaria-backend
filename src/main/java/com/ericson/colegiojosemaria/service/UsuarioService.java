@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -15,6 +16,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UsuarioService implements IUsuario {
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public ResponseEntity<Map<String, Object>> listar() {
@@ -58,24 +60,32 @@ public class UsuarioService implements IUsuario {
         try {
             String message = validarUsuario(usuario);
             if (message.equals("OK")) {
-                Usuario user = usuarioRepository.save(usuario);
-                response.put("data", user);
-                response.put("message", "Usuario registrado correctamente");
-                response.put("status", HttpStatus.CREATED.value());
+                usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+                usuarioRepository.save(usuario);
+                response.put("message", "successfully registered user");
+                response.put("status", HttpStatus.OK.value());
             } else {
-                response.put("data", new Usuario());
                 response.put("message", message);
-                response.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
+                response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
             }
         } catch (Exception e) {
-            response.put("data", new Usuario());
-            response.put("message", e.toString());
+            System.out.println(e.getMessage());
+            response.put("message", "Error internal server");
             response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.ok(response);
     }
 
     private String validarUsuario(Usuario usuario) {
-        return "OKK";
+        Optional<Usuario> optional = usuarioRepository.findOneByNumero(usuario.getNumero());
+        if (optional.isPresent()) {
+            return "User already exists with the same DNI number";
+        }
+
+        optional = usuarioRepository.findOneByEmail(usuario.getEmail());
+        if (optional.isPresent()) {
+            return "User already exists with the same email";
+        }
+        return "OK";
     }
 }

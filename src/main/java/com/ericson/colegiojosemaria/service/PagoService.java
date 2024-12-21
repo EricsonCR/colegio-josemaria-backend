@@ -1,8 +1,13 @@
 package com.ericson.colegiojosemaria.service;
 
+import com.ericson.colegiojosemaria.dto.EmailDto;
 import com.ericson.colegiojosemaria.interfaces.IPago;
+import com.ericson.colegiojosemaria.model.Estudiante;
+import com.ericson.colegiojosemaria.model.Matricula;
 import com.ericson.colegiojosemaria.model.Pago;
 import com.ericson.colegiojosemaria.model.PagoDetalle;
+import com.ericson.colegiojosemaria.repository.EstudianteRepository;
+import com.ericson.colegiojosemaria.repository.MatriculaRepository;
 import com.ericson.colegiojosemaria.repository.PagoDetalleRepository;
 import com.ericson.colegiojosemaria.repository.PagoRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.*;
 
 @Service
@@ -17,6 +23,10 @@ import java.util.*;
 public class PagoService implements IPago {
     private final PagoRepository pagoRepository;
     private final PagoDetalleRepository pagoDetalleRepository;
+    private final MatriculaRepository matriculaRepository;
+    private final EstudianteRepository estudianteRepository;
+    private final EmailService emailService;
+    private final ReporteService reporteService;
 
     @Override
     public ResponseEntity<Map<String, Object>> listar() {
@@ -50,21 +60,36 @@ public class PagoService implements IPago {
                 });
                 List<PagoDetalle> pagoDetalle = pagoDetalleRepository.saveAll(pago.getPagoDetalle());
                 myPago.setPagoDetalle(pagoDetalle);
+
+                EmailDto emailDto = new EmailDto();
+                emailDto.setSubject("Comprobante de Pago");
+                emailDto.setBody("");
+                File file = reporteService.reportePago(myPago);
+                Optional<Matricula> optional = matriculaRepository.findById(myPago.getId_matricula());
+                if(optional.isPresent()) {
+                    Matricula matricula = optional.get();
+                    Optional<Estudiante> opt = estudianteRepository.findById((long) matricula.getId_estudiante());
+                    if(opt.isPresent()) {
+                        Estudiante estudiante = opt.get();
+                        emailDto.setToUser(estudiante.getEmail());
+                    }
+                }
+                emailService.sendEmail(emailDto, file);
                 lista.add(myPago);
-                response.put("data", lista);
-                response.put("message", "Pago creado correctamente");
-                response.put("status", HttpStatus.CREATED);
-                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+                //response.put("data", lista);
+                response.put("message", "successful payment");
+                response.put("status", HttpStatus.OK.value());
+                return ResponseEntity.ok(response);
             }
-            response.put("data", lista);
+            //response.put("data", lista);
             response.put("message", message);
-            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            response.put("data", lista);
-            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR);
+            //response.put("data", lista);
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
             response.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            return ResponseEntity.ok(response);
         }
     }
 
